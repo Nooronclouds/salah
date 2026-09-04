@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Adhan picker</title>
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    max-width: 640px; margin: 0 auto; padding: 2rem 1.25rem 4rem;
+    background: #faf8f4; color: #1c1a17; line-height: 1.5;
+  }
+  @media (prefers-color-scheme: dark) {
+    body { background: #14130f; color: #ece7dd; }
+    .row { background: #1e1c17; border-color: #2c2925; }
+  }
+  h1 { font-weight: 600; font-size: 1.5rem; margin: 0 0 .25rem; }
+  p.sub { margin: 0 0 1.5rem; opacity: .7; font-size: .9rem; }
+  .row {
+    display: flex; align-items: center; gap: .9rem;
+    background: #fff; border: 1px solid #e7e2d8; border-radius: 12px;
+    padding: .8rem 1rem; margin-bottom: .7rem;
+  }
+  .num {
+    font-variant-numeric: tabular-nums; font-weight: 600; font-size: 1.05rem;
+    min-width: 2.4rem;
+  }
+  .len { font-size: .8rem; opacity: .6; min-width: 3.2rem; font-variant-numeric: tabular-nums; }
+  audio { flex: 1; height: 38px; }
+  .note { margin-top: 2rem; font-size: .85rem; opacity: .75; }
+  code { background: rgba(128,128,128,.15); padding: .1rem .35rem; border-radius: 5px; }
+</style>
+</head>
+<body>
+  <h1>Pick your adhan</h1>
+  <p class="sub">Listen to each, then tell Claude the number(s) you like. Phone-call
+  audio is narrowband, so these mono clips will sound right on the actual call.</p>
+  <div id="list"></div>
+  <p class="note">All clips from islamcan.com. Whichever you pick, we'll host our own
+  copy so the app never depends on an outside site staying up. Note: for <b>Fajr</b>
+  a proper adhan adds the line <i>"as-salatu khayrun min an-nawm"</i> — if none of
+  these are Fajr versions, we'll source a dedicated Fajr clip separately.</p>
+
+<script>
+  // [number, duration label]
+  const clips = [
+    [1,"2:13"],[2,"3:06"],[3,"3:16"],[4,"3:26"],[5,"2:08"],[6,"1:58"],[7,"2:52"],
+    [8,"2:00"],[9,"3:47"],[10,"4:42"],[11,"5:49"],[12,"3:20"],[13,"3:57"],[14,"3:31"]
+  ];
+  const list = document.getElementById("list");
+  for (const [n, len] of clips) {
+    const row = document.createElement("div");
+    row.className = "row";
+    row.innerHTML =
+      `<span class="num">#${n}</span>` +
+      `<span class="len">${len}</span>` +
+      `<audio controls preload="none" src="./adhans/azan${n}.mp3"></audio>`;
+    list.appendChild(row);
+  }
+</script>
+</body>
+</html>
