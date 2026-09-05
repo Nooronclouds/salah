@@ -26,7 +26,7 @@ from adhan_call import place_call
 
 # A public, hotlink-friendly adhan clip so the PoC works out of the box.
 # Override with ADHAN_AUDIO_URL in .env to use your own hosted adhan.
-DEFAULT_ADHAN_URL = "https://www.islamcan.com/audio/adhan/azan6.mp3"
+DEFAULT_ADHAN_URL = "https://raw.githubusercontent.com/Nooronclouds/salah/main/poc/adhans/azan6.mp3"
 
 # Optional spoken line before the adhan. Empty by default = pure adhan.
 # If set (here or via SPOKEN_INTRO in .env), it's read in a soothing male voice.

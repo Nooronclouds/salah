@@ -39,12 +39,13 @@ from adhanpy.calculation.Madhab import Madhab
 
 from adhan_call import place_call
 
-DEFAULT_ADHAN_URL = "https://www.islamcan.com/audio/adhan/azan6.mp3"
-# Fajr has its own adhan (adds "as-salatu khayrun min an-nawm"). Canonical
-# archive.org URL — it 302-redirects to a live node; Twilio follows redirects.
-DEFAULT_FAJR_ADHAN_URL = (
-    "https://archive.org/download/athan_fajr_23-10-2014/athan_fajr_23-10-2014_surayhi.mp3"
-)
+# Self-hosted adhan audio (our own GitHub repo, served raw). Stable, audio/mpeg,
+# and no dependency on any third-party site staying up.
+_RAW = "https://raw.githubusercontent.com/Nooronclouds/salah/main/poc/adhans"
+DEFAULT_ADHAN_URL = f"{_RAW}/azan6.mp3"
+# Fajr has its own adhan (adds "as-salatu khayrun min an-nawm"), sped up 1.5x so
+# it wakes you rather than lulling you back to sleep.
+DEFAULT_FAJR_ADHAN_URL = f"{_RAW}/fajr_1.5x.mp3"
 VOICE = "Polly.Matthew-Neural"
 
 # How often the loop wakes up to check the time (seconds). Small enough to hit
