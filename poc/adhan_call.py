@@ -4,31 +4,21 @@ Shared call logic: build the TwiML and place the adhan call.
 Used by both call_adhan.py (manual one-off test) and scheduler.py (the automatic
 prayer-time scheduler), so there is a single source of truth for how a call is
 made.
+
+The call plays an optional soft spoken intro (a pre-recorded audio clip, e.g.
+"It's time for Fajr") followed by the adhan. Both are just audio URLs Twilio
+fetches and plays — no robotic text-to-speech on the call itself.
 """
 
 from twilio.rest import Client
 
 
-def build_twiml(adhan_url: str, intro_text: str = "", voice: str = "Polly.Matthew-Neural") -> str:
+def build_twiml(adhan_url: str, intro_url: str = "") -> str:
     """
-    Build the call script (TwiML).
-
-    - If intro_text is given, it's spoken first in `voice` (a soothing male voice
-      by default), e.g. "Noor, it's time for Fajr".
-    - Then the adhan mp3 is played.
-
-    intro_text is escaped for the few XML-special characters so a name or prayer
-    label can never break the markup.
+    Build the call script (TwiML): play the intro clip (if given), then the adhan.
     """
-    say = ""
-    if intro_text.strip():
-        safe = (
-            intro_text.replace("&", "&amp;")
-            .replace("<", "&lt;")
-            .replace(">", "&gt;")
-        )
-        say = f'<Say voice="{voice}">{safe}</Say>'
-    return f"<Response>{say}<Play>{adhan_url}</Play></Response>"
+    intro = f"<Play>{intro_url}</Play>" if intro_url else ""
+    return f"<Response>{intro}<Play>{adhan_url}</Play></Response>"
 
 
 def place_call(
@@ -36,10 +26,9 @@ def place_call(
     from_number: str,
     to_number: str,
     adhan_url: str,
-    intro_text: str = "",
-    voice: str = "Polly.Matthew-Neural",
+    intro_url: str = "",
 ) -> str:
     """Place the call and return the Twilio call SID."""
-    twiml = build_twiml(adhan_url, intro_text, voice)
+    twiml = build_twiml(adhan_url, intro_url)
     call = client.calls.create(to=to_number, from_=from_number, twiml=twiml)
     return call.sid

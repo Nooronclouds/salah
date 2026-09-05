@@ -46,7 +46,12 @@ DEFAULT_ADHAN_URL = f"{_RAW}/azan6.mp3"
 # Fajr has its own adhan (adds "as-salatu khayrun min an-nawm"), sped up 1.5x so
 # it wakes you rather than lulling you back to sleep.
 DEFAULT_FAJR_ADHAN_URL = f"{_RAW}/fajr_1.5x.mp3"
-VOICE = "Polly.Matthew-Neural"
+
+# Pre-recorded soft spoken intros ("It's time for <prayer>"), one per prayer,
+# self-hosted alongside the adhans. A prayer with no intro file just plays the
+# adhan with no preamble.
+_RAW_INTROS = "https://raw.githubusercontent.com/Nooronclouds/salah/main/poc/intros"
+INTRO_PRAYERS = {"fajr", "dhuhr", "asr", "maghrib", "isha"}
 
 # How often the loop wakes up to check the time (seconds). Small enough to hit
 # the right minute; large enough to be gentle.
@@ -123,11 +128,9 @@ def compute_times(cfg: dict, now_local: datetime) -> dict:
     return times
 
 
-def intro_for(cfg: dict, prayer: str) -> str:
-    label = PRAYER_LABELS.get(prayer, prayer.title())
-    if cfg["name"]:
-        return f"{cfg['name']}, it's time for {label}."
-    return f"It's time for {label}."
+def intro_url_for(prayer: str) -> str:
+    """URL of the spoken intro clip for this prayer, or '' if none exists."""
+    return f"{_RAW_INTROS}/{prayer}.mp3" if prayer in INTRO_PRAYERS else ""
 
 
 def print_schedule(cfg: dict, times: dict, now_local: datetime) -> None:
@@ -139,14 +142,15 @@ def print_schedule(cfg: dict, times: dict, now_local: datetime) -> None:
 
 
 def fire_call(cfg: dict, prayer: str) -> None:
-    intro = intro_for(cfg, prayer)
     # Fajr gets its own adhan; the other four share the default.
     adhan_url = cfg["fajr_adhan_url"] if prayer == "fajr" else cfg["adhan_url"]
-    print(f"[{datetime.now(cfg['tz']).strftime('%H:%M:%S')}] Calling for {prayer} — \"{intro}\"")
+    intro_url = intro_url_for(prayer)
+    label = PRAYER_LABELS.get(prayer, prayer.title())
+    print(f"[{datetime.now(cfg['tz']).strftime('%H:%M:%S')}] Calling for {label}")
     try:
         sid = place_call(
             cfg["client"], cfg["from_number"], cfg["to_number"],
-            adhan_url, intro, VOICE,
+            adhan_url, intro_url,
         )
         print(f"    call placed (SID {sid})")
     except TwilioRestException as exc:

@@ -28,10 +28,10 @@ from adhan_call import place_call
 # Override with ADHAN_AUDIO_URL in .env to use your own hosted adhan.
 DEFAULT_ADHAN_URL = "https://raw.githubusercontent.com/Nooronclouds/salah/main/poc/adhans/azan6.mp3"
 
-# Optional spoken line before the adhan. Empty by default = pure adhan.
-# If set (here or via SPOKEN_INTRO in .env), it's read in a soothing male voice.
-DEFAULT_SPOKEN_INTRO = ""
-VOICE = "Polly.Matthew-Neural"
+# Optional soft spoken intro clip played before the adhan (an audio URL). Empty
+# by default = pure adhan. Set INTRO_URL in .env to test a specific intro, e.g.
+# https://raw.githubusercontent.com/Nooronclouds/salah/main/poc/intros/fajr.mp3
+DEFAULT_INTRO_URL = ""
 
 
 def require_env(name: str) -> str:
@@ -53,7 +53,7 @@ def main() -> None:
     to_number = require_env("TO_NUMBER")
 
     adhan_url = os.getenv("ADHAN_AUDIO_URL", DEFAULT_ADHAN_URL)
-    intro = os.getenv("SPOKEN_INTRO", DEFAULT_SPOKEN_INTRO)
+    intro_url = os.getenv("INTRO_URL", DEFAULT_INTRO_URL)
 
     client = Client(account_sid, auth_token)
 
@@ -61,7 +61,7 @@ def main() -> None:
     print("(Twilio trial: answer, then press any key to get past the trial gate.)")
 
     try:
-        sid = place_call(client, from_number, to_number, adhan_url, intro, VOICE)
+        sid = place_call(client, from_number, to_number, adhan_url, intro_url)
     except TwilioRestException as exc:
         sys.exit(f"\nTwilio rejected the call: {exc.msg}\n(code {exc.code})")
 
