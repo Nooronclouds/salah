@@ -93,6 +93,25 @@ class SprigDivider extends StatelessWidget {
   }
 }
 
+/// The soft cream card used across the app for grouped content.
+class GardenCard extends StatelessWidget {
+  const GardenCard({super.key, required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: GardenColors.paper,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFF0E7CF)),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      child: child,
+    );
+  }
+}
+
 /// A section label ("PRAYERS") trailed by a dotted rule.
 class SectionHeader extends StatelessWidget {
   const SectionHeader(this.title, {super.key});

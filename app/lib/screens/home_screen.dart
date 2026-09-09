@@ -6,6 +6,8 @@ import 'package:salah/models/journal_entry.dart';
 import 'package:salah/models/prayer.dart';
 import 'package:salah/services/journal_store.dart';
 import 'package:salah/services/prayer_times_service.dart';
+import 'package:salah/services/settings_store.dart';
+import 'package:salah/screens/settings_screen.dart';
 import 'package:salah/theme.dart';
 import 'package:salah/widgets/garden.dart';
 
@@ -19,11 +21,11 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final JournalStore _store = JournalStore();
-  final PrayerTimesService _prayerTimes = const PrayerTimesService();
+  final SettingsStore _settingsStore = SettingsStore();
   final DateFormat _time = DateFormat('HH:mm');
 
   final DateTime _date = DateTime.now();
-  late final Map<Prayer, DateTime> _times = _prayerTimes.timesFor(_date);
+  Map<Prayer, DateTime> _times = {};
   late final TextEditingController _reflection = TextEditingController();
   final List<TextEditingController> _gratitude = [];
 
@@ -48,9 +50,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _load() async {
+    final settings = await _settingsStore.load();
     final entry = await _store.load(JournalStore.keyFor(_date));
     if (!mounted) return;
     setState(() {
+      _times = PrayerTimesService.fromSettings(settings).timesFor(_date);
       _entry = entry;
       _reflection.text = entry.reflection;
       _gratitude
@@ -58,6 +62,18 @@ class _HomeScreenState extends State<HomeScreen> {
         ..addAll(entry.gratitude.map((t) => TextEditingController(text: t)));
       if (_gratitude.isEmpty) _gratitude.add(TextEditingController());
       _loading = false;
+    });
+  }
+
+  Future<void> _openSettings() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (_) => const SettingsScreen()),
+    );
+    // Settings may have changed location/method/madhab — recompute times.
+    final settings = await _settingsStore.load();
+    if (!mounted) return;
+    setState(() {
+      _times = PrayerTimesService.fromSettings(settings).timesFor(_date);
     });
   }
 
@@ -147,7 +163,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Align(
               alignment: Alignment.centerRight,
               child: IconButton(
-                onPressed: () {}, // Settings — next build.
+                onPressed: _openSettings,
                 icon: const Icon(Icons.menu, color: GardenColors.fern),
               ),
             ),
@@ -166,7 +182,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _prayersCard() {
-    return _Card(
+    return GardenCard(
       child: Column(
         children: [
           for (final prayer in Prayer.obligatory) _prayerRow(prayer),
@@ -218,7 +234,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _gratitudeCard() {
-    return _Card(
+    return GardenCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -291,25 +307,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-    );
-  }
-}
-
-/// The soft cream card used for prayers and gratitude.
-class _Card extends StatelessWidget {
-  const _Card({required this.child});
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: GardenColors.paper,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFF0E7CF)),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-      child: child,
     );
   }
 }
