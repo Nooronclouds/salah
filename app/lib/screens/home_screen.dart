@@ -7,6 +7,7 @@ import 'package:salah/models/prayer.dart';
 import 'package:salah/services/journal_store.dart';
 import 'package:salah/services/prayer_times_service.dart';
 import 'package:salah/services/settings_store.dart';
+import 'package:salah/screens/export_preview_screen.dart';
 import 'package:salah/screens/settings_screen.dart';
 import 'package:salah/theme.dart';
 import 'package:salah/widgets/garden.dart';
@@ -147,8 +148,27 @@ class _HomeScreenState extends State<HomeScreen> {
             _gratitudeCard(),
             const SectionHeader('Reflection'),
             _reflectionCard(),
+            const SizedBox(height: 22),
+            _saveDayButton(),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _saveDayButton() {
+    return Center(
+      child: TextButton.icon(
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => ExportPreviewScreen(date: _date),
+            ),
+          );
+        },
+        icon: const Icon(Icons.eco_outlined, color: GardenColors.fern, size: 18),
+        label: const Text('save today’s page',
+            style: TextStyle(color: GardenColors.fern)),
       ),
     );
   }

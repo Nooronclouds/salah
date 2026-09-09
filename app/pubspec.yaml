@@ -46,6 +46,10 @@ dependencies:
   intl: ^0.19.0
   # Warm serif typography for the garden-journal feel.
   google_fonts: ^6.2.1
+  # Export keepsake: build the PDF, share it (Drive/print), save PNG to gallery.
+  pdf: ^3.11.1
+  printing: ^5.13.3
+  gal: ^2.3.0
 
 dev_dependencies:
   flutter_test:
