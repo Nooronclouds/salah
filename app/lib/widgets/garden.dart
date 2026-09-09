@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:salah/models/prayer.dart';
+import 'package:salah/services/photo_storage.dart';
 import 'package:salah/theme.dart';
 
 /// A single pressed blossom.
@@ -88,6 +89,33 @@ class SprigDivider extends StatelessWidget {
           const SizedBox(width: 4),
           Leaf(width: 16),
         ],
+      ),
+    );
+  }
+}
+
+/// A rounded photo thumbnail, loaded via the platform image provider.
+class PhotoThumb extends StatelessWidget {
+  const PhotoThumb({super.key, required this.path, this.size = 76});
+  final String path;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Image(
+        image: photoImageProvider(path),
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stack) => Container(
+          width: size,
+          height: size,
+          color: GardenColors.pistachio,
+          child: const Icon(Icons.image_not_supported_outlined,
+              color: GardenColors.fernDeep, size: 20),
+        ),
       ),
     );
   }

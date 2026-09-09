@@ -29,6 +29,8 @@ class KeepsakePage extends StatelessWidget {
 
   bool get _hasReflection => entry.reflection.trim().isNotEmpty;
 
+  List<String> get _photos => entry.photoPaths;
+
   /// Prayers to show: the five obligatory, plus any optional ones marked done.
   List<Prayer> get _prayers => [
         ...Prayer.obligatory,
@@ -63,9 +65,23 @@ class KeepsakePage extends StatelessWidget {
               const SectionHeader('Reflection'),
               _reflectionBlock(),
             ],
+            if (_photos.isNotEmpty) ...[
+              const SectionHeader('Today in photos'),
+              _photosRow(),
+            ],
           ],
         ),
       ),
+    );
+  }
+
+  Widget _photosRow() {
+    return Wrap(
+      spacing: 10,
+      runSpacing: 10,
+      children: [
+        for (final path in _photos) PhotoThumb(path: path, size: 92),
+      ],
     );
   }
 

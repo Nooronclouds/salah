@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:salah/models/journal_entry.dart';
 import 'package:salah/models/prayer.dart';
 import 'package:salah/services/journal_store.dart';
+import 'package:salah/services/photo_service.dart';
 import 'package:salah/services/prayer_times_service.dart';
 import 'package:salah/services/settings_store.dart';
 import 'package:salah/screens/export_preview_screen.dart';
@@ -23,6 +24,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final JournalStore _store = JournalStore();
   final SettingsStore _settingsStore = SettingsStore();
+  final PhotoService _photos = PhotoService();
   final DateFormat _time = DateFormat('HH:mm');
 
   final DateTime _date = DateTime.now();
@@ -129,6 +131,24 @@ class _HomeScreenState extends State<HomeScreen> {
     _persistSoon();
   }
 
+  Future<void> _addPhoto() async {
+    final path = await _photos.pickFromGallery();
+    if (path == null || !mounted) return;
+    setState(() {
+      _entry = _entry.copyWith(photoPaths: [..._entry.photoPaths, path]);
+    });
+    _store.save(_entry);
+  }
+
+  void _removePhoto(String path) {
+    setState(() {
+      _entry = _entry.copyWith(
+        photoPaths: _entry.photoPaths.where((p) => p != path).toList(),
+      );
+    });
+    _store.save(_entry);
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_loading) {
@@ -148,6 +168,8 @@ class _HomeScreenState extends State<HomeScreen> {
             _gratitudeCard(),
             const SectionHeader('Reflection'),
             _reflectionCard(),
+            const SectionHeader('Photos'),
+            _photosCard(),
             const SizedBox(height: 22),
             _saveDayButton(),
           ],
@@ -299,6 +321,61 @@ class _HomeScreenState extends State<HomeScreen> {
           hintText: 'if a prayer slipped, or anything on your heart…',
           hintStyle: TextStyle(color: Color(0x887C352D), fontSize: 14),
         ),
+      ),
+    );
+  }
+
+  Widget _photosCard() {
+    return GardenCard(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: [
+            for (final path in _entry.photoPaths) _photoTile(path),
+            _addPhotoTile(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _photoTile(String path) {
+    return Stack(
+      children: [
+        PhotoThumb(path: path),
+        Positioned(
+          top: -6,
+          right: -6,
+          child: IconButton(
+            iconSize: 18,
+            visualDensity: VisualDensity.compact,
+            onPressed: () => _removePhoto(path),
+            icon: const CircleAvatar(
+              radius: 11,
+              backgroundColor: GardenColors.melon,
+              child: Icon(Icons.close, size: 13, color: Color(0xFF7C352D)),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _addPhotoTile() {
+    return InkWell(
+      onTap: _addPhoto,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        width: 76,
+        height: 76,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: GardenColors.pistachio, width: 1.4),
+        ),
+        child: const Icon(Icons.add_a_photo_outlined,
+            color: GardenColors.fern, size: 22),
       ),
     );
   }
