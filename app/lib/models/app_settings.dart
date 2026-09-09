@@ -69,6 +69,10 @@ class AppSettings {
     this.exportTarget = ExportTarget.pngGallery,
     this.reminderHour = 21,
     this.reminderMinute = 30,
+    this.timezone = 'Asia/Kolkata',
+    this.callsEnabled = false,
+    this.backendUrl = '',
+    this.backendToken = '',
   });
 
   final String phoneNumber;
@@ -84,6 +88,10 @@ class AppSettings {
   final ExportTarget exportTarget;
   final int reminderHour;
   final int reminderMinute;
+  final String timezone;
+  final bool callsEnabled;
+  final String backendUrl;
+  final String backendToken;
 
   AppSettings copyWith({
     String? phoneNumber,
@@ -99,6 +107,10 @@ class AppSettings {
     ExportTarget? exportTarget,
     int? reminderHour,
     int? reminderMinute,
+    String? timezone,
+    bool? callsEnabled,
+    String? backendUrl,
+    String? backendToken,
   }) {
     return AppSettings(
       phoneNumber: phoneNumber ?? this.phoneNumber,
@@ -114,6 +126,10 @@ class AppSettings {
       exportTarget: exportTarget ?? this.exportTarget,
       reminderHour: reminderHour ?? this.reminderHour,
       reminderMinute: reminderMinute ?? this.reminderMinute,
+      timezone: timezone ?? this.timezone,
+      callsEnabled: callsEnabled ?? this.callsEnabled,
+      backendUrl: backendUrl ?? this.backendUrl,
+      backendToken: backendToken ?? this.backendToken,
     );
   }
 
@@ -131,6 +147,10 @@ class AppSettings {
         'exportTarget': exportTarget.name,
         'reminderHour': reminderHour,
         'reminderMinute': reminderMinute,
+        'timezone': timezone,
+        'callsEnabled': callsEnabled,
+        'backendUrl': backendUrl,
+        'backendToken': backendToken,
       };
 
   factory AppSettings.fromJson(Map<String, dynamic> json) {
@@ -150,6 +170,10 @@ class AppSettings {
           _byName(ExportTarget.values, json['exportTarget']) ?? defaults.exportTarget,
       reminderHour: (json['reminderHour'] as int?) ?? defaults.reminderHour,
       reminderMinute: (json['reminderMinute'] as int?) ?? defaults.reminderMinute,
+      timezone: (json['timezone'] as String?) ?? defaults.timezone,
+      callsEnabled: (json['callsEnabled'] as bool?) ?? defaults.callsEnabled,
+      backendUrl: (json['backendUrl'] as String?) ?? defaults.backendUrl,
+      backendToken: (json['backendToken'] as String?) ?? defaults.backendToken,
     );
   }
 

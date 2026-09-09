@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:salah/models/app_settings.dart';
 import 'package:salah/models/prayer.dart';
+import 'package:salah/services/backend_client.dart';
 import 'package:salah/services/settings_store.dart';
 import 'package:salah/theme.dart';
 import 'package:salah/widgets/garden.dart';
@@ -18,8 +19,10 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final SettingsStore _store = SettingsStore();
+  final BackendClient _backend = const BackendClient();
   AppSettings _settings = const AppSettings();
   bool _loading = true;
+  bool _busy = false;
 
   @override
   void initState() {
@@ -59,6 +62,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               children: [
                 const SectionHeader('The call'),
                 _callCard(),
+                const SectionHeader('Call service'),
+                _serviceCard(),
                 const SectionHeader('Journal'),
                 _journalCard(),
                 const SizedBox(height: 28),
@@ -189,6 +194,110 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _update(_settings.copyWith(callPrayers: next));
       },
     );
+  }
+
+  Widget _serviceCard() {
+    return GardenCard(
+      child: Column(
+        children: [
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            activeThumbColor: GardenColors.fern,
+            title: const Text('Calls enabled', style: TextStyle(fontSize: 16)),
+            subtitle: const Text('Ring me at prayer times',
+                style: TextStyle(color: GardenColors.muted, fontSize: 12.5)),
+            value: _settings.callsEnabled,
+            onChanged: (on) => _update(_settings.copyWith(callsEnabled: on)),
+          ),
+          SettingRow(
+            label: 'Service URL',
+            value: _settings.backendUrl.isEmpty ? 'not set' : _settings.backendUrl,
+            onTap: _editBackendUrl,
+          ),
+          SettingRow(
+            label: 'API token',
+            value: _settings.backendToken.isEmpty ? 'not set' : '••••••',
+            onTap: _editBackendToken,
+            last: true,
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: GardenColors.fern,
+                      side: const BorderSide(color: GardenColors.fern),
+                    ),
+                    onPressed: _busy ? null : _sync,
+                    child: const Text('Sync settings'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: GardenColors.fern,
+                      foregroundColor: GardenColors.parchment,
+                    ),
+                    onPressed: _busy ? null : _testCall,
+                    child: Text(_busy ? '…' : 'Test call'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _sync() => _run(
+        () => _backend.pushConfig(_settings),
+        success: 'Settings synced to the call service.',
+      );
+
+  Future<void> _testCall() => _run(
+        () => _backend.sendTestCall(_settings),
+        success: 'Calling your phone now…',
+      );
+
+  Future<void> _run(
+    Future<String> Function() action, {
+    required String success,
+  }) async {
+    setState(() => _busy = true);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await action();
+      messenger.showSnackBar(SnackBar(content: Text(success)));
+    } on BackendException catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text(e.message)));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _editBackendUrl() async {
+    final result = await editText(
+      context,
+      title: 'Call service URL',
+      initial: _settings.backendUrl,
+      hint: 'https://your-service.example.com',
+      keyboardType: TextInputType.url,
+    );
+    if (result != null) _update(_settings.copyWith(backendUrl: result.trim()));
+  }
+
+  Future<void> _editBackendToken() async {
+    final result = await editText(
+      context,
+      title: 'API token',
+      initial: _settings.backendToken,
+      hint: 'the server\'s API_TOKEN',
+    );
+    if (result != null) _update(_settings.copyWith(backendToken: result.trim()));
   }
 
   Future<void> _editPhone() async {

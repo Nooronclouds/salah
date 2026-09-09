@@ -53,6 +53,8 @@ dependencies:
   # Photo attach: pick images and persist them in app storage.
   image_picker: ^1.1.2
   path_provider: ^2.1.4
+  # Talk to the call-service backend.
+  http: ^1.2.2
 
 dev_dependencies:
   flutter_test:
