@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:salah/models/app_settings.dart';
 import 'package:salah/models/journal_entry.dart';
 import 'package:salah/models/prayer.dart';
+import 'package:salah/services/backend_client.dart';
 import 'package:salah/services/journal_store.dart';
 import 'package:salah/services/photo_service.dart';
 import 'package:salah/services/prayer_times_service.dart';
@@ -25,6 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final JournalStore _store = JournalStore();
   final SettingsStore _settingsStore = SettingsStore();
   final PhotoService _photos = PhotoService();
+  final BackendClient _backend = const BackendClient();
   final DateFormat _time = DateFormat('HH:mm');
 
   final DateTime _date = DateTime.now();
@@ -66,6 +69,20 @@ class _HomeScreenState extends State<HomeScreen> {
       if (_gratitude.isEmpty) _gratitude.add(TextEditingController());
       _loading = false;
     });
+    _maybeAutoSync(settings);
+  }
+
+  /// Best-effort: on open, keep the call service's config fresh so calls resume
+  /// after a backend restart without the user re-syncing by hand. Silent.
+  void _maybeAutoSync(AppSettings settings) {
+    if (!settings.callsEnabled) return;
+    if (settings.backendUrl.trim().isEmpty ||
+        settings.backendToken.trim().isEmpty) {
+      return;
+    }
+    unawaited(
+      _backend.pushConfig(settings).catchError((Object _) => ''),
+    );
   }
 
   Future<void> _openSettings() async {

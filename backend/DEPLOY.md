@@ -48,8 +48,9 @@ In the app: **Settings → Call service**
 ## Good to know
 
 - **Free tier storage is ephemeral.** If Koyeb restarts/redeploys the service,
-  the last-pushed config is lost and calls pause until you open the app and tap
-  **Sync settings** again. (A future improvement: have the app auto-sync on open.)
+  the last-pushed config is lost. The app **auto-syncs when you open it** (if
+  calls are enabled and the service URL/token are set), so simply opening the app
+  restores the config — or tap **Sync settings** to force it.
 - **One instance only.** Don't scale to multiple instances — each would run its
   own scheduler and you'd get duplicate calls.
 - Twilio still needs the destination number verified while on a trial, and adds
