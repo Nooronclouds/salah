@@ -3,3 +3,6 @@ uvicorn[standard]>=0.30.0
 twilio>=9.0.0
 adhanpy>=1.0.0
 python-dotenv>=1.0.0
+# Timezone database — slim base images don't ship one, and ZoneInfo needs it.
+tzdata>=2024.1
+
